@@ -12,8 +12,14 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
-import com.journeyapps.barcodescanner.camera.CameraSettings; // IMPORT BARU
+import com.journeyapps.barcodescanner.camera.CameraSettings;
+
 import java.util.HashMap;
+
+// Retrofit imports for our new connection
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class GuardScanActivity extends AppCompatActivity {
 
@@ -29,14 +35,12 @@ public class GuardScanActivity extends AppCompatActivity {
         barcodeView = findViewById(R.id.barcodeScanner);
         btnBack = findViewById(R.id.btnBack);
 
-        com.journeyapps.barcodescanner.camera.CameraSettings settings = new com.journeyapps.barcodescanner.camera.CameraSettings();
-
+        CameraSettings settings = new CameraSettings();
         settings.setRequestedCameraId(0);
-
         settings.setAutoFocusEnabled(true);
-
         barcodeView.setCameraSettings(settings);
 
+        // Keep direct Firebase references ONLY for checking-in/writing logs for now
         String dbUrl = "https://v-pass-d85c7-default-rtdb.firebaseio.com/";
         visitorRef = FirebaseDatabase.getInstance(dbUrl).getReference("visitors");
         logRef = FirebaseDatabase.getInstance(dbUrl).getReference("entry_logs");
@@ -60,48 +64,62 @@ public class GuardScanActivity extends AppCompatActivity {
     private final BarcodeCallback callback = new BarcodeCallback() {
         @Override
         public void barcodeResult(BarcodeResult result) {
-            // Kita pause supaya dia tak scan berkali-kali masa tengah proses
-            barcodeView.pause();
+            barcodeView.pause(); // Pause scanner during processing
             verifyQR(result.getText());
         }
     };
 
+    // =========================================================================
+    // UPDATED: Now verifies via your custom Node.js Backend using Retrofit!
+    // =========================================================================
     private void verifyQR(String qrData) {
-        visitorRef.child(qrData).get().addOnSuccessListener(snapshot -> {
-            if (!snapshot.exists()) {
-                showFailDialog("Invalid QR: Record not found.");
-                return;
+        // CHANGE THIS TO:
+        // true  -> if testing via the Android Studio Emulator
+        // false -> if testing on a physical Android phone plugged into USB
+        boolean useEmulator = true;
+
+        RetrofitClient.getApiService(useEmulator).verifyVisitor(qrData).enqueue(new Callback<VisitorResponse>() {
+            @Override
+            public void onResponse(Call<VisitorResponse> call, Response<VisitorResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    // Node.js approved access!
+                    VisitorResponse visitor = response.body();
+                    String name = visitor.getName();
+                    String plateNumber = visitor.getPlateNumber();
+
+                    showSuccessDialog(qrData, name, plateNumber);
+                } else {
+                    // Node.js denied access! Handle status codes set up in index.js
+                    if (response.code() == 404) {
+                        showFailDialog("Invalid QR: Record not found.");
+                    } else if (response.code() == 403) {
+                        showFailDialog("Access Denied: Banned by management.");
+                    } else {
+                        showFailDialog("Access Denied: Server error (" + response.code() + ")");
+                    }
+                }
             }
 
-            String status = snapshot.child("status").getValue(String.class);
-
-            if (!"ACTIVE".equals(status)) {
-                showFailDialog("Access Denied: QR already used or expired.");
-                return;
+            @Override
+            public void onFailure(Call<VisitorResponse> call, Throwable t) {
+                // If the server is offline or connection fails
+                Toast.makeText(GuardScanActivity.this, "Backend Connection Failed: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                barcodeView.resume(); // Restart scanner so guard can try again
             }
-
-            String name = snapshot.child("name").getValue(String.class);
-            String vehicle = snapshot.child("vehicle").getValue(String.class);
-
-            showSuccessDialog(qrData, name, vehicle);
-
-        }).addOnFailureListener(e -> {
-            Toast.makeText(this, "Database error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            barcodeView.resume();
         });
     }
 
-    private void showSuccessDialog(String qrId, String name, String vehicle) {
+    private void showSuccessDialog(String qrId, String name, String plateNumber) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("ACCESS GRANTED");
         builder.setMessage(
                 "Visitor: " + name +
-                        "\nVehicle: " + (vehicle != null ? vehicle : "No Vehicle") +
+                        "\nVehicle Plate: " + (plateNumber != null ? plateNumber : "No Registered Plate") +
                         "\n\nProceed with Check-In?"
         );
 
         builder.setPositiveButton("CHECK-IN", (dialog, which) -> {
-            checkInVisitor(qrId, name, vehicle);
+            checkInVisitor(qrId, name, plateNumber);
         });
 
         builder.setNegativeButton("CANCEL", (dialog, which) -> {
@@ -130,12 +148,12 @@ public class GuardScanActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void checkInVisitor(String qrId, String name, String vehicle) {
+    private void checkInVisitor(String qrId, String name, String plateNumber) {
         visitorRef.child(qrId).child("status").setValue("CHECKED_IN");
 
         HashMap<String, Object> log = new HashMap<>();
         log.put("name", name);
-        log.put("vehicle", vehicle);
+        log.put("vehicle", plateNumber);
         log.put("timestamp", System.currentTimeMillis());
 
         logRef.push().setValue(log)
