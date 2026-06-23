@@ -35,10 +35,19 @@ public class GuardScanActivity extends AppCompatActivity {
         barcodeView = findViewById(R.id.barcodeScanner);
         btnBack = findViewById(R.id.btnBack);
 
+<<<<<<< HEAD
         CameraSettings settings = new CameraSettings();
         settings.setRequestedCameraId(0);
         settings.setAutoFocusEnabled(true);
         barcodeView.setCameraSettings(settings);
+=======
+        // --- TAMBAHAN UNTUK LAJUKAN SCAN ---
+        CameraSettings settings = new CameraSettings();
+        settings.setRequestedCameraId(0); // Guna kamera belakang
+        settings.setAutoFocusEnabled(true); // Paksa auto-focus sentiasa ON
+        barcodeView.getBarcodeView().setCameraSettings(settings);
+        // ------------------------------------
+>>>>>>> parent of f102df6 (last)
 
         // Keep direct Firebase references ONLY for checking-in/writing logs for now
         String dbUrl = "https://v-pass-d85c7-default-rtdb.firebaseio.com/";

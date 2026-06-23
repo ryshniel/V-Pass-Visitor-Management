@@ -101,8 +101,13 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
+<<<<<<< HEAD
     <list default="true" id="d1e7159f-33d2-4a1c-a433-83ab260d3c81" name="Changes" comment="last">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+=======
+    <list default="true" id="d1e7159f-33d2-4a1c-a433-83ab260d3c81" name="Changes" comment="Add Firebase visitor registration feature">
+      <change beforePath="$PROJECT_DIR$/.gradle/8.13/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.13/fileHashes/fileHashes.lock" afterDir="false" />
+>>>>>>> parent of f102df6 (last)
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -190,7 +195,11 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/tempegrg/V-Pass-Visitor-Management.git&quot;,
+<<<<<<< HEAD
     &quot;accountId&quot;: &quot;c1401583-bab1-4db0-8e64-d51043121790&quot;
+=======
+    &quot;accountId&quot;: &quot;2977a531-87df-4a63-b873-856ab60db0ef&quot;
+>>>>>>> parent of f102df6 (last)
   }
 }</component>
   <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\User\.gradle\wrapper\dists\gradle-8.13-bin\5xuhj0ry160q40clulazy9h7d\gradle-8.13" javaHome="C:\Program Files\Android\Android Studio\jbr" gradleVersion="8.13" />
@@ -578,15 +587,7 @@
       <option name="project" value="LOCAL" />
       <updated>1769722108648</updated>
     </task>
-    <task id="LOCAL-00025" summary="last">
-      <option name="closed" value="true" />
-      <created>1769763100054</created>
-      <option name="number" value="00025" />
-      <option name="presentableId" value="LOCAL-00025" />
-      <option name="project" value="LOCAL" />
-      <updated>1769763100054</updated>
-    </task>
-    <option name="localTasksCounter" value="26" />
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -629,8 +630,7 @@
     <MESSAGE value="Update ada Team Members" />
     <MESSAGE value="Update 3.45am" />
     <MESSAGE value="UPDATE VPASS PROJECT" />
-    <MESSAGE value="last" />
-    <option name="LAST_COMMIT_MESSAGE" value="last" />
+    <option name="LAST_COMMIT_MESSAGE" value="UPDATE VPASS PROJECT" />
   </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">
